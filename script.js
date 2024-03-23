@@ -1,33 +1,29 @@
-if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        var map = L.map('map').setView([51.505, -0.09], 13);
+document.addEventListener('DOMContentLoaded', function () {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.watchPosition(function(position) {
+            var map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-        var marker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
-        marker.bindPopup("Você está aqui").openPopup();
-    }, function() {
-        alert("Não foi possível acessar sua localização.");
-    });
-} else {
-    alert("Geolocalização não é suportada pelo seu navegador.");
-}
+            var customIcon = L.icon({
+                iconUrl: 'images/pinIconKid.png',
+                iconSize: [46, 57], // Tamanho do ícone
+                iconAnchor: [22, 94], // Ponto do ícone que corresponderá à localização do marcador
+                popupAnchor: [-3, -76] // Ponto a partir do qual o popup deve abrir em relação ao iconAnchor
+            });
 
-if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', function(event) {
-        var alpha = event.alpha;
-        // Atualize aqui a rotação do marcador baseada em `alpha`
-        // Esta é a direção (em graus) na qual o dispositivo está apontando.
-    }, false);
-}
-
-var customIcon = L.icon({
-    iconUrl: 'caminho_para_seu_icone.png',
-    iconSize: [38, 95], // tamanho do ícone
-    iconAnchor: [22, 94], // ponto do ícone que corresponderá à localização do marcador
-    popupAnchor: [-3, -76] // ponto a partir do qual o popup deve abrir em relação ao iconAnchor
+            L.marker([position.coords.latitude, position.coords.longitude], {icon: customIcon}).addTo(map);
+        }, function(error) {
+            console.log(error);
+            alert('Não foi possível obter a localização.');
+        }, {
+            enableHighAccuracy: true,
+            maximumAge: 10000,
+            timeout: 5000
+        });
+    } else {
+        alert("Geolocalização não é suportada pelo seu navegador.");
+    }
 });
-
-L.marker([51.5, -0.09], {icon: customIcon}).addTo(map);
